@@ -8,6 +8,7 @@ import productModel from "../models/product.js";
 import orderModel from "../models/Order.js";
 import cartModel from "../models/CartModel.js";
 import mongoose from "mongoose";
+import NewsletterModel from "../models/NewsLetter.js";
 
 dotenv.config()
 export const registeruser = async (req:Request , res:Response) =>{
@@ -613,6 +614,169 @@ export const clearCart = async (
   }
 };
 
+// news letter =================
+
+export const newsLetterSubscribe = async(req:Request , res:Response)=>{
+  try {
+    
+     const {email} = req.body
+
+      if(!email){
+        return res.status(400).json({success:false , message: "email not found",})
+      }
+
+     const isExisting = await NewsletterModel.findOne({email : email.toLowerCase().trim()})
+
+      if(isExisting){
+        return res.status(400).json({success:false , message: "This email is already subscribed",})
+      }
+
+       if(!validator.isEmail(email)){
+        return res.status(400).json({success:false , message: "please enter a valid email",})
+       }
+
+         await NewsletterModel.create({
+          email: email.toLowerCase().trim()
+         })
+        
+        return res.status(200).json({success:true ,   message: "Successfully subscribed to newsletter 🎉"})
+ 
+  } catch (error:any) {
+       return res.status(500).json({
+      success: false,
+      message: "Something went wrong",
+    }); 
+  }
+}
 
 
+// ============wish list ===========
 
+export const addToWishlist = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { productId } = req.body;
+    const userId = (req as any).userId;
+
+    if (!productId) {
+      return res.status(400).json({
+        success: false,
+        message: "Product ID is required",
+      });
+    }
+
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const alreadyInWishlist = user.wishlist.includes(productId);
+
+    if (alreadyInWishlist) {
+      return res.status(400).json({
+        success: false,
+        message: "Product already in wishlist",
+      });
+    }
+
+    user.wishlist.push(productId);
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product added to wishlist ❤️",
+    });
+
+  } catch (error: any) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// ================get wish list of user=====================
+
+export const getWishlist = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const userId = (req as any).userId;
+
+    const user = await userModel
+      .findById(userId)
+      .populate("wishlist");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      wishlist: user.wishlist,
+    });
+
+  } catch (error: any) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// ================remove wish list of user=====================
+
+
+export const removeFromWishlist = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { productId } = req.params;
+    const userId = (req as any).userId;
+
+    const user = await userModel.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.wishlist = user.wishlist.filter(
+      (id) => id.toString() !== productId
+    );
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Product removed from wishlist",
+    });
+
+  } catch (error: any) {
+    console.log(error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

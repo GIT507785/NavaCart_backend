@@ -1,7 +1,7 @@
 import express from 'express'
-import {  addToCart, cancelOrder, clearCart, findProductById, getAllOrders,
- getAllproducts, getCart, getOrderById, getprofile, loginUser, placeOrder,
-registeruser, removeFromCart, updateOrder, 
+import {  addToCart, addToWishlist, cancelOrder, clearCart, findProductById, getAllOrders,
+ getAllproducts, getCart, getOrderById, getprofile, getWishlist, loginUser, newsLetterSubscribe, placeOrder,
+registeruser, removeFromCart, removeFromWishlist, updateOrder, 
 updateQuantity} from '../Controller/user.js'
 import authUser from '../middleware/auth.js'
 
@@ -30,7 +30,23 @@ userRouter.post("/update-quantity",authUser, updateQuantity);
 userRouter.post("/remove-cart", authUser, removeFromCart);
 userRouter.delete("/clear-cart", authUser , clearCart);
 
+userRouter.post('/subscribe'  ,newsLetterSubscribe)
+userRouter.post(
+  "/addWishlist",
+  authUser,
+  addToWishlist
+);
 
+userRouter.get(
+  "/getWishlist",
+  authUser,
+  getWishlist
+);
 
+userRouter.delete(
+  "/removeWishlist/:productId",
+  authUser,
+  removeFromWishlist
+);
 
 export default userRouter

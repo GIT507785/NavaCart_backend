@@ -20,6 +20,18 @@ const userSchema = new mongoose.Schema({
     image:{
         type:String,
     },
+
+      cartData: {
+    type: Object,
+    default: {},
+  },
+
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+    },
+  ],
      
 },{timestamps:true})
 
