@@ -1,0 +1,20 @@
+import express from 'express'
+import { addProduct, adminLogin, deleteProductById, editProduct, getAllproducts, 
+    getSingleProductById } from '../Controller/Admin.js'
+import upload from '../config/multer.js'
+
+const adminRouter = express.Router()
+
+
+adminRouter.post('/login' , adminLogin)
+adminRouter.post('/addproduct' , upload.array("image", 4) ,addProduct)
+adminRouter.get('/getproducts' , getAllproducts)
+adminRouter.get('/getproductById' ,  getSingleProductById)
+adminRouter.delete('/deleteProduct' , deleteProductById)
+adminRouter.put('/editproduct' , editProduct)
+
+
+
+
+
+export default adminRouter
