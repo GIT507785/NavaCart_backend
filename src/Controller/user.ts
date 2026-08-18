@@ -307,7 +307,7 @@ export const getAllOrders = async (
 export const getOrderById = async (req:Request , res:Response)=>{
     try {
         
-      const {orderId} = (req as any).userId
+      const {orderId} = req.params
       
       if(!orderId){
             return res.status(400).json({success:false , message:"order id not found"})
@@ -769,7 +769,7 @@ export const removeFromWishlist = async (
     return res.status(200).json({
       success: true,
       message: "Product removed from wishlist",
-    });
+    }); 
 
   } catch (error: any) {
     console.log(error);

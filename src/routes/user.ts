@@ -18,7 +18,7 @@ userRouter.get("/profile" , getprofile)
 userRouter.post('/placeOrder' , authUser, placeOrder)
 userRouter.put('/updateOrder' , authUser ,updateOrder)
 userRouter.get("/getAllOrders" , authUser ,getAllOrders)
-userRouter.get('/singleOrder' ,  authUser ,getOrderById)
+userRouter.get('/singleOrder/:orderId' ,  authUser ,getOrderById)
 userRouter.put("/cancleOrder" , authUser ,cancelOrder)
 
   
