@@ -1,8 +1,8 @@
 import express from 'express'
-import {  addToCart, addToWishlist, cancelOrder, clearCart, findProductById, getAllOrders,
- getAllproducts, getCart, getOrderById, getprofile, getWishlist, loginUser, newsLetterSubscribe, placeOrder,
-registeruser, removeFromCart, removeFromWishlist, updateOrder, 
-updateQuantity} from '../Controller/user.js'
+import {  addToCart, addToWishlist, cancelOrder, clearCart, findProductById , getAllproducts, getCart, getprofile, getUserOrders, getWishlist, loginUser, newsLetterSubscribe, placeOrder,
+registeruser, removeFromCart, removeFromWishlist,  
+updateQuantity,
+updateUserOrder} from '../Controller/user.js'
 import authUser from '../middleware/auth.js'
 
 
@@ -16,9 +16,8 @@ userRouter.get("/profile" , getprofile)
 
 
 userRouter.post('/placeOrder' , authUser, placeOrder)
-userRouter.put('/updateOrder' , authUser ,updateOrder)
-userRouter.get("/getAllOrders" , authUser ,getAllOrders)
-userRouter.get('/singleOrder/:orderId' ,  authUser ,getOrderById)
+userRouter.put('/updateUserOrder' , authUser ,updateUserOrder)
+userRouter.get('/myorders' ,  authUser ,getUserOrders)
 userRouter.put("/cancleOrder" , authUser ,cancelOrder)
 
   

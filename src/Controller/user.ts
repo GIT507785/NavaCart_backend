@@ -275,110 +275,163 @@ export const placeOrder = async (
 };
 
 
-
-
-//get allorders 
-
-export const getAllOrders = async (
-  req: Request,
-  res: Response
-) => {
+// get order by id 
+export const getUserOrders = async (req: Request, res: Response) => {
   try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
     const orders = await orderModel
-    .find()
-    .populate("userId")
-    .populate("addressId")
-    .sort({ createdAt: -1 });
-    
-    res.json({
+      .find({ userId })
+      .populate("addressId")
+      .populate("items.productId")
+      .sort({ date: -1 });
+
+    return res.status(200).json({
       success: true,
       orders,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-// get order by id 
-
-export const getOrderById = async (req:Request , res:Response)=>{
-    try {
-        
-      const {orderId} = req.params
-      
-      if(!orderId){
-            return res.status(400).json({success:false , message:"order id not found"})
-          }
-          
-          const order = await orderModel.findById(orderId).populate("addressId").populate("items.productId")
-          
-          return  res.json({success:true , order})
-          
-          
-        } catch (error:any) {
-          return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-    }
-}
-
 // order update 
-export const updateOrder = async (req:Request , res:Response)=>{
-  try {
-    
-    const {orderId , orderStatus} = req.body
-    
-    if(!orderId){
-            return res.json({success:false , message:"order id not found"})
-          }
-          
-          const order = await orderModel.findByIdAndUpdate(orderId , {orderStatus} , {new: true} )
-
-        return res.json({success:true , order})
-        
-
-    } catch (error:any) {
-              return res.status(500).json({
-      success: false,
-      message: error.message,
-    })
-    }
-}
-
-//cancle order 
-export const cancelOrder = async (
+export const updateUserOrder = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const { orderId } = req.body;
-    
-    const order = await orderModel.findByIdAndUpdate(
+    const userId = (req as any).userId;
+
+    const {
       orderId,
-      {
-        orderStatus: "Cancelled",
-      },
-      { new: true }
-    );
+      addressId,
+      items,
+    } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID not found",
+      });
+    }
+
+    // Check that this order belongs to this user
+    const order = await orderModel.findOne({
+      _id: orderId,
+      userId: userId,
+    });
 
     if (!order) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "Order not found",
       });
     }
-    
-    res.json({
+
+    // Update only fields user is allowed to change
+    // if (addressId) {
+    //   order.addressId = addressId;
+    // }
+
+    if (items) {
+      order.items = items;
+    }
+
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Order updated successfully",
+      order,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+//cancle order 
+export const cancelOrder = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { orderId } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID not found",
+      });
+    }
+
+    // Make sure this order belongs to the logged-in user
+    const order = await orderModel.findOne({
+      _id: orderId,
+      userId: userId,
+    });
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    // Don't allow cancellation after shipping
+    if (
+  order.orderStatus === "OutForDelivery" ||
+  order.orderStatus === "Delivered"
+) {
+  return res.status(400).json({
+    success: false,
+    message: "This order cannot be cancelled",
+  });
+}
+
+    if (order.orderStatus === "Canceled") {
+      return res.status(400).json({
+        success: false,
+        message: "Order is already cancelled",
+      });
+    }
+
+    order.orderStatus = "Canceled";
+
+    await order.save();
+
+    return res.status(200).json({
       success: true,
       message: "Order cancelled successfully",
       order,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

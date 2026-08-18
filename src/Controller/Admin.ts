@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken"
 import productModel from "../models/product.js";
 import fs from 'fs'
 import imagekit from '../config/imageKit.js'
+import orderModel from "../models/Order.js";
 
 export const adminLogin = async (req:Request , res:Response) =>{
     try {
@@ -194,3 +195,74 @@ export const editProduct = async (req:Request , res:Response)=>{
 }
 
 
+// get all orders  ==============
+
+ export const getAllOrders = async (
+   req: Request,
+   res: Response
+ ) => {
+   try {
+     const orders = await orderModel
+     .find()
+     .populate("userId")
+     .populate("addressId")
+     .sort({ createdAt: -1 });
+     
+     res.json({
+       success: true,
+       orders,
+     });
+   } catch (error: any) {
+     res.status(500).json({
+       success: false,
+       message: error.message,
+     });
+   }
+ };
+
+
+// ====================
+
+export const updateOrder = async (req: Request, res: Response) => {
+  try {
+    const { orderId, orderStatus } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID not found",
+      });
+    }
+
+    if (!orderStatus) {
+      return res.status(400).json({
+        success: false,
+        message: "Order status is required",
+      });
+    }
+
+    const order = await orderModel.findByIdAndUpdate(
+      orderId,
+      { orderStatus },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
