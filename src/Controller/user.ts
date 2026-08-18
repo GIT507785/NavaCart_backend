@@ -256,6 +256,23 @@ export const placeOrder = async (
     // SUCCESS
     // ==============================
 
+     const user = await userModel.findById(userId)
+      
+     if (!user) {
+  return res.status(404).json({
+    success: false,
+    message: "User not found",
+  });
+}
+
+  for(const item of items){
+    if(user.cartData[item.itemId]){
+      delete user.cartData[item.itemId]
+    }
+  }
+   
+   await user.save()
+
     return res.status(201).json({
       success: true,
       message: "Order placed successfully",
