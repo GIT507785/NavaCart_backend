@@ -14,8 +14,8 @@ adminRouter.get('/getproductById' ,  getSingleProductById)
 adminRouter.delete('/deleteProduct' , deleteProductById)
 adminRouter.put('/editproduct' , editProduct)
 
-adminRouter.put('/allOrders' , getAllOrders)
-adminRouter.put('/cancelOrder' , cancelOrder)
+adminRouter.get('/allOrders' , getAllOrders)
+adminRouter.post('/cancelOrder' , cancelOrder)
 
 
 
