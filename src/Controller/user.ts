@@ -289,8 +289,6 @@ export const getUserOrders = async (req: Request, res: Response) => {
 
     const orders = await orderModel
       .find({ userId })
-      .populate("addressId")
-      .populate("items.productId")
       .sort({ date: -1 });
 
     return res.status(200).json({
